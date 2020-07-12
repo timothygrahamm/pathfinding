@@ -3,13 +3,13 @@
     "tasks": [
       {
         "type": "shell",
-        "label": "g++.exe build active file",
+        "label": "g++.exe build project",
         "command": "C:\\MinGW\\bin\\g++.exe",
         "args": [
           "-I",
           "C:/SFML-2.5.1/include",
           "-g",
-          "${file}",
+          "${fileDirname}/*.cpp",
           "-o",
           "${fileDirname}\\Build\\${fileBasenameNoExtension}.exe",
           "-v",
