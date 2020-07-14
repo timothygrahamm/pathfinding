@@ -87,6 +87,7 @@ int WinMain()
                 int i = 0;
                 path_shapes = std::vector<sf::CircleShape>();
                 std::cout << "cleared shapes" << std::endl;
+                path_step = 0;
                 for(sf::Vector2f point : path){
                     std::cout << point.x << std::endl;
                     sf::CircleShape temp_path_shape = sf::CircleShape(1.f);
