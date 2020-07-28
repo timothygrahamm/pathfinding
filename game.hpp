@@ -3,6 +3,7 @@
 
 #include "SFML/Graphics.hpp"
 #include "point_element.hpp"
+#include "nav_point.hpp"
 #include "region_element.hpp"
 #include <iostream>
 #include <unordered_map>
@@ -29,6 +30,8 @@ class Game
         void inputs();
 
         std::vector<PointElement> * GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
+
+        std::vector<PointElement> * GenerateNavMap(int width, int height);
 
         bool game_running = false;
         sf::RenderWindow * window;

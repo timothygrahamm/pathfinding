@@ -11,6 +11,8 @@ class PointElement
 {
     public:
 
+        PointElement(){}
+
         PointElement(sf::Vector2f _position, float _size, sf::Color _color);
 
         sf::CircleShape shape;

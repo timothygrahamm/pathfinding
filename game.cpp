@@ -3,6 +3,7 @@
 Game::Game(sf::RenderWindow * _window, sf::Font _font){
     this->window = _window;
     this->font = _font;
+    this->pieces["NAVMAP"] = GenerateNavMap(_window->getSize().x,_window->getSize().y);
 }
 
 void Game::run(){
@@ -27,16 +28,16 @@ void Game::logic(){
         float destY = subject->shape.getPosition().y;
 
         if (destX < path->at(this->path_step).shape.getPosition().x){
-            destX += 0.01;
+            destX += 0.1;
         }
         else{
-            destX -= 0.01;
+            destX -= 0.1;
         }
         if (destY <  path->at(this->path_step).shape.getPosition().y){
-            destY += 0.01;
+            destY += 0.1;
         }
         else{
-            destY -= 0.01;
+            destY -= 0.1;
         }
         if (std::abs(destX -  path->at(this->path_step).shape.getPosition().x) <= 20 && std::abs(destY -  path->at(this->path_step).shape.getPosition().y) <= 20){
             this->path_step++;
@@ -79,7 +80,7 @@ void Game::inputs(){
             std::cout << "clearing old path" << std::endl;
             this->pieces["PATH"]->clear();
             this->path_step = 0;
-            GeneratePath(this->pieces["SUBJECT"]->at(0).shape.getPosition(), this->pieces["ORDER"]->at(0).shape.getPosition());
+            this->pieces["PATH"] = GeneratePath(this->pieces["SUBJECT"]->at(0).shape.getPosition(), this->pieces["ORDER"]->at(0).shape.getPosition());
         }
     }
 }
@@ -89,8 +90,6 @@ std::vector<PointElement> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f
     bool goal_reached = false;
 
     std::vector<PointElement> * path_vector = new std::vector<PointElement>();
-
-    this->pieces["PATH"] = path_vector;
 
     while (!goal_reached){
         if (origin.x < goal.x && std::abs(origin.x - goal.x) >= 20){
@@ -114,3 +113,19 @@ std::vector<PointElement> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f
     std::cout << "leaving generate path" << std::endl;
     return path_vector;
 }
+
+std::vector<PointElement> * Game::GenerateNavMap(int width, int height){
+
+    std::cout << std::to_string(width) << std::endl;
+    std::vector<PointElement> * node_map_vector = new std::vector<PointElement>();
+
+    for(int x = 0; x <= width; x+=50){
+        for(int y = 0; y <= height; y+=50){
+            std::cout << std::to_string(x) << std::endl;
+            node_map_vector->push_back(NavPoint(sf::Vector2f(x, y), 2.f, sf::Color::White));
+        }
+    }
+    
+    return node_map_vector;
+}
+
