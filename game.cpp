@@ -41,7 +41,7 @@ void Game::logic(){
         else{
             destY -= 0.1;
         }
-        if (std::abs(destX - (*path)[path_step_id].shape.getPosition().x) <= NAV_MAP_GAP && std::abs(destY - (*path)[path_step_id].shape.getPosition().y) <= NAV_MAP_GAP){
+        if (std::abs(destX - (*path)[path_step_id].shape.getPosition().x) <= 10 && std::abs(destY - (*path)[path_step_id].shape.getPosition().y) <= 10){
             this->path_step++;
         }
         subject->move_to(destX,destY);

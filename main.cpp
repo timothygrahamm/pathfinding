@@ -13,8 +13,8 @@ int WinMain()
     sf::RenderWindow window(sf::VideoMode(WINDOW_X, WINDOW_Y), "pathfinding");
 
     sf::Font font;
-    if (!font.loadFromFile("resources/sansation.ttf"))
-        return EXIT_FAILURE;
+    //if (!font.loadFromFile("resources/sansation.ttf"))
+    //    return EXIT_FAILURE;
     
     Game game = Game(&window,font);
 
