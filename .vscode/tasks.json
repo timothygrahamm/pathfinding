@@ -1,45 +1,66 @@
 {
     "version": "2.0.0",
     "tasks": [
-      {
-        "type": "shell",
-        "label": "g++.exe build project",
-        "command": "C:\\MinGW\\bin\\g++.exe",
-        "args": [
-          "-I",
-          "C:/SFML-2.5.1/include",
-          "-g",
-          "${fileDirname}/*.cpp",
-          "-o",
-          "${fileDirname}\\Build\\${fileBasenameNoExtension}.exe",
-          "-v",
-          "-L",
-          "C:/SFML-2.5.1/lib",
-          "-l",
-          "freetype",
-          "-l",
-          "sfml-system",
-          "-l",
-          "opengl32",
-          "-l",
-          "sfml-window",
-          "-l",
-          "sfml-graphics",
-          "-l",
-          "winmm",
-          "-l",
-          "gdi32"
-        ],
-        "options": {
-          "cwd": "C:\\MinGW\\bin"
+        {
+            "type": "shell",
+            "label": "g++.exe build project",
+            "command": "C:\\MinGW\\bin\\g++.exe",
+            "args": [
+                "-I",
+                "C:/SFML-2.5.1/include",
+                "-g",
+                "${fileDirname}/*.cpp",
+                "-o",
+                "${fileDirname}\\Build\\${fileBasenameNoExtension}.exe",
+                "-v",
+                "-L",
+                "C:/SFML-2.5.1/lib",
+                "-l",
+                "freetype",
+                "-l",
+                "sfml-system",
+                "-l",
+                "opengl32",
+                "-l",
+                "sfml-window",
+                "-l",
+                "sfml-graphics",
+                "-l",
+                "winmm",
+                "-l",
+                "gdi32"
+            ],
+            "options": {
+                "cwd": "C:\\MinGW\\bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
-        "problemMatcher": [
-          "$gcc"
-        ],
-        "group": {
-          "kind": "build",
-          "isDefault": true
+        {
+            "type": "shell",
+            "label": "C/C++: g++.exe build active file",
+            "command": "C:\\MinGW\\bin\\g++.exe",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
-      }
     ]
-  }
+}

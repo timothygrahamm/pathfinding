@@ -13,11 +13,13 @@ class PointElement
 
         PointElement(){}
 
-        PointElement(sf::Vector2f _position, float _size, sf::Color _color);
+        PointElement(sf::Vector2f _position, float _size, sf::Color _color, std::string _id);
 
         sf::CircleShape shape;
 
         void move_to(float x, float y);
+
+        std::string id;
 
     protected:
 
