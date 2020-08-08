@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <string>
 #include "SFML/Graphics.hpp"
 #include <ctime>
@@ -18,15 +18,15 @@ int WinMain()
     
     Game game = Game(&window,font);
 
-    std::unordered_map<std::string, PointElement> * subject_map = new std::unordered_map<std::string, PointElement>();
+    std::map<std::string, PointElement> * subject_map = new std::map<std::string, PointElement>();
     game.pieces["SUBJECT"] = subject_map;
     sf::Vector2f subject_pos(300.f,600.f);
     (*subject_map)["0"] = (PointElement(subject_pos,20.f,sf::Color::Green, "0"));
 
-    std::unordered_map<std::string, PointElement> * order_map = new std::unordered_map<std::string, PointElement>();
+    std::map<std::string, PointElement> * order_map = new std::map<std::string, PointElement>();
     game.pieces["ORDER"] = order_map;
 
-    std::unordered_map<std::string, PointElement> * path_map = new std::unordered_map<std::string, PointElement>();
+    std::map<std::string, PointElement> * path_map = new std::map<std::string, PointElement>();
     game.pieces["PATH"] = path_map;
 
     game.run();

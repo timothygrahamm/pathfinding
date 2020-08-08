@@ -7,7 +7,7 @@
 #include "region_element.hpp"
 #include "config.hpp"
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 class Game
@@ -19,8 +19,8 @@ class Game
 
         void run();
 
-        std::unordered_map<std::string, std::unordered_map<std::string, RegionElement> *> regions;
-        std::unordered_map<std::string, std::unordered_map<std::string, PointElement> *> pieces;
+        std::map<std::string, std::map<std::string, RegionElement> *> regions;
+        std::map<std::string, std::map<std::string, PointElement> *> pieces;
 
     protected:
     
@@ -30,9 +30,9 @@ class Game
 
         void inputs();
 
-        std::unordered_map<std::string, PointElement> * GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
+        std::map<std::string, PointElement> * GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
 
-        std::unordered_map<std::string, PointElement> * GenerateNavMap(int width, int height);
+        std::map<std::string, PointElement> * GenerateNavMap(int width, int height);
 
         std::string find_closest_nav_point_key(float _x, float _y);
 
@@ -40,6 +40,8 @@ class Game
         sf::RenderWindow * window;
         sf::Font font;
         int path_step;
+
+        std::vector<std::string> nav_map_keys;
 
 };
 

@@ -14,7 +14,6 @@ NavPoint::NavPoint(sf::Vector2f _position, float _size, sf::Color _color, std::s
 void NavPoint::calculate_cost(sf::Vector2f destination){
     int cost = std::abs(int(destination.y) - this->pos.y) + std::abs(int(destination.x) - this->pos.x);
     this->cost = cost;
-    //std::cout << std::to_string(this->cost) << std::endl;
 }
 
 std::string NavPoint::get_adj_key(Direction dir){
