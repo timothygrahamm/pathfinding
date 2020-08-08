@@ -30,7 +30,7 @@ class Game
 
         void inputs();
 
-        std::map<std::string, PointElement> * GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
+        std::vector<std::string> * GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
 
         std::map<std::string, PointElement> * GenerateNavMap(int width, int height);
 
@@ -41,6 +41,7 @@ class Game
         sf::Font font;
         int path_step;
 
+        std::vector<std::string> path_vector;
         std::vector<std::string> nav_map_keys;
 
 };

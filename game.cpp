@@ -4,6 +4,7 @@ Game::Game(sf::RenderWindow * _window, sf::Font _font){
     this->window = _window;
     this->font = _font;
     this->pieces["NAVMAP"] = GenerateNavMap(_window->getSize().x,_window->getSize().y);
+    this->path_vector = std::vector<std::string>();
     std::vector<std::string> nav_map_keys = std::vector<std::string>();
 }
 
@@ -20,9 +21,7 @@ void Game::run(){
 * make each Element handle their own logic checks?
 */
 void Game::logic(){
-     if (this->path_step < this->pieces["PATH"]->size()){
-
-        std::map<std::string, PointElement> * path = this->pieces["PATH"];
+     if ( this->path_step < this->path_vector.size() ){
 
         PointElement * subject = &(*this->pieces["SUBJECT"])["0"];
         float destX = subject->shape.getPosition().x;
@@ -30,19 +29,22 @@ void Game::logic(){
 
         std::string path_step_id = std::to_string(this->path_step);
 
-        if (destX < (*path)[path_step_id].shape.getPosition().x){
+        NavPoint * next_nav_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[this->path_vector.at(this->path_step)]);
+
+        if (destX < next_nav_point->shape.getPosition().x){
             destX += 0.1;
         }
         else{
             destX -= 0.1;
         }
-        if (destY <  (*path)[path_step_id].shape.getPosition().y){
+        if (destY <  next_nav_point->shape.getPosition().y){
             destY += 0.1;
         }
         else{
             destY -= 0.1;
         }
-        if (std::abs(destX - (*path)[path_step_id].shape.getPosition().x) <= 10 && std::abs(destY - (*path)[path_step_id].shape.getPosition().y) <= 10){
+        if (std::abs(destX - next_nav_point->shape.getPosition().x) <= 10 && std::abs(destY - next_nav_point->shape.getPosition().y) <= 10){
+            next_nav_point->shape.setFillColor(sf::Color::White);
             this->path_step++;
         }
         subject->move_to(destX,destY);
@@ -90,7 +92,6 @@ void Game::inputs(){
             std::string nav_map_key = find_closest_nav_point_key(event.mouseButton.x,event.mouseButton.y);
             (*this->pieces["NAVMAP"])[nav_map_key].shape.setFillColor(sf::Color::Yellow);
            
-            this->pieces["PATH"]->clear();
             this->path_step = 0;
 
             std::cout << "navmap size before: " + std::to_string(this->pieces["NAVMAP"]->size()) << std::endl;
@@ -102,42 +103,56 @@ void Game::inputs(){
 
             std::cout << "navmap size after: " + std::to_string(this->pieces["NAVMAP"]->size()) << std::endl;
 
-            this->pieces["PATH"] = GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
+            this->path_vector = *GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
         }
     }
 }
 
-std::map<std::string, PointElement> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f goal){
+std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f goal){
 
     bool goal_reached = false;
+    NavPoint * old_point;
+    for( const auto& key : this->path_vector ) {
+        old_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[key]);
+        old_point->shape.setFillColor(sf::Color::White);
+    }
+    this->path_vector.clear();
+    std::vector<std::string> * path_vector = new std::vector<std::string>();
 
-    std::map<std::string, PointElement> * path_map = new std::map<std::string, PointElement>();
-    int id = 0;
+    std::string origin_key = find_closest_nav_point_key(origin.x, origin.y);
+    std::string goal_key = find_closest_nav_point_key(goal.x, goal.y);
+
+    NavPoint * current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[origin_key]);
+    
     while (!goal_reached){
-        if (origin.x < goal.x && std::abs(origin.x - goal.x) >= 20){
-            origin.x += 10;
-        }
-        else if (origin.x > goal.x && std::abs(origin.x - goal.x) >= 20){
-            origin.x -= 10;
+
+        std::string dir_key;
+        std::string best_cost_key;
+        int current_cost = INT32_MAX;
+
+        for ( int dir = NORTH; dir != LAST; dir++ ){
+
+            dir_key = current_point->get_adj_key(Direction(dir));
+            NavPoint * adjacent_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[dir_key]);
+
+            if (adjacent_point->cost < current_cost){
+                best_cost_key = adjacent_point->id;
+                current_cost = adjacent_point->cost;
+            }
         }
 
-        if (origin.y < goal.y && std::abs(origin.y - goal.y) >= 20){
-            origin.y += 10;
-        }
-        else if (origin.y > goal.y && std::abs(origin.y - goal.y) >= 20){
-            origin.y -= 10;
-        }
-        (*path_map)[std::to_string(id)] = PointElement(sf::Vector2f(origin.x, origin.y), 2.f, sf::Color::White, std::to_string(id));
-        if (std::abs(origin.x - goal.x) <= 20 && std::abs(origin.y - goal.y) <= 20){
+        current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[best_cost_key]);
+        current_point->shape.setFillColor(sf::Color::Yellow);
+        path_vector->push_back(best_cost_key);
+
+        if (best_cost_key==goal_key){
             goal_reached = true;
         }
-        id++;
+        
     }
 
-    return path_map;
+    return path_vector;
 }
-
-
 
 std::string Game::find_closest_nav_point_key(float _x, float _y){
     int x_remainder = int(_x) % NAV_MAP_GAP;
@@ -159,6 +174,14 @@ std::string Game::find_closest_nav_point_key(float _x, float _y){
     else{
         closest_y = int(_y) + (NAV_MAP_GAP - y_remainder);
     }
+
+    if (closest_y==WINDOW_Y){
+        closest_y--;
+    }
+    if (closest_x==WINDOW_X){
+        closest_x--;
+    }
+    
     return std::to_string(closest_x) + "," + std::to_string(closest_y);
     
 }

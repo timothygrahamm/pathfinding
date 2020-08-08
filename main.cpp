@@ -26,9 +26,6 @@ int WinMain()
     std::map<std::string, PointElement> * order_map = new std::map<std::string, PointElement>();
     game.pieces["ORDER"] = order_map;
 
-    std::map<std::string, PointElement> * path_map = new std::map<std::string, PointElement>();
-    game.pieces["PATH"] = path_map;
-
     game.run();
 
     return 0;

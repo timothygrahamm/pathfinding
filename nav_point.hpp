@@ -13,7 +13,8 @@ enum Direction
     SOUTH,
     SOUTH_WEST,
     WEST,
-    NORTH_WEST
+    NORTH_WEST,
+    LAST
 };
 
 class NavPoint : public PointElement
@@ -22,6 +23,8 @@ class NavPoint : public PointElement
     public:
 
         NavPoint(sf::Vector2f _position, float _size, sf::Color _color, std::string _id);
+
+        std::string get_lowest_cost_key();
 
         std::string get_adj_key(Direction dir);
 
