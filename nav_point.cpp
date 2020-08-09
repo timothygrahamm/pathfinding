@@ -20,6 +20,15 @@ std::string NavPoint::get_adj_key(Direction dir){
 
     int adj_x = this->pos.x;
     int adj_y = this->pos.y;
+
+    if (adj_x==WINDOW_X-1){
+        adj_x+=1;
+    }
+
+    if (adj_y==WINDOW_Y-1){
+        adj_y+=1;
+    }
+
     int x_change = 0;
     int y_change = 0;
 
@@ -48,11 +57,11 @@ std::string NavPoint::get_adj_key(Direction dir){
     }
 
     if (adj_x<0 || adj_x > WINDOW_X-1){
-        return NULL;
+        return "";
     }
 
     if (adj_y<0 || adj_y > WINDOW_Y-1){
-        return NULL;
+        return "";
     }
 
     return std::to_string(adj_x) + "," + std::to_string(adj_y);

@@ -94,14 +94,10 @@ void Game::inputs(){
            
             this->path_step = 0;
 
-            std::cout << "navmap size before: " + std::to_string(this->pieces["NAVMAP"]->size()) << std::endl;
-
             for ( std::string key_value : this->nav_map_keys){
                 NavPoint * element = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[key_value]);
                 element->calculate_cost((*this->pieces["ORDER"])["0"].shape.getPosition());
             }
-
-            std::cout << "navmap size after: " + std::to_string(this->pieces["NAVMAP"]->size()) << std::endl;
 
             this->path_vector = *GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
         }
@@ -133,6 +129,9 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
         for ( int dir = NORTH; dir != LAST; dir++ ){
 
             dir_key = current_point->get_adj_key(Direction(dir));
+            if (dir_key==""){
+                continue;
+            }
             NavPoint * adjacent_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[dir_key]);
 
             if (adjacent_point->cost < current_cost){
