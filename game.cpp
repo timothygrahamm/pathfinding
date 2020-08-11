@@ -13,13 +13,11 @@ void Game::run(){
     while(this->game_running){
         this->inputs();
         this->logic();
+        
         this->draw();
     }
 }
-/*
-* Currently moves subject along path, needs collision detecting code
-* make each Element handle their own logic checks?
-*/
+
 void Game::logic(){
      if ( this->path_step < this->path_vector.size() ){
 
@@ -49,6 +47,35 @@ void Game::logic(){
         }
         subject->move_to(destX,destY);
     }
+    this->check_collisions();
+}
+
+void Game::check_collisions(){
+    bool collided = false;
+    PointElement * subject = &(*this->pieces["SUBJECT"])["0"];
+    for( const auto& key_value : this->regions ) {
+        std::map<std::string,RegionElement> * region_map = key_value.second;
+        for ( const auto& key_value : *region_map){
+            RegionElement element = key_value.second;
+            if (subject->shape.getPosition().x + subject->shape.getRadius() > element.shape.getPosition().x && subject->shape.getPosition().x - subject->shape.getRadius() < element.shape.getPosition().x + element.shape.getSize().x &&
+            subject->shape.getPosition().y + subject->shape.getRadius() > element.shape.getPosition().y && subject->shape.getPosition().y - subject->shape.getRadius() < element.shape.getPosition().y + element.shape.getSize().y){
+                this->path_step = 0;
+                NavPoint * old_point;
+                for( const auto& key : this->path_vector ) {
+                    old_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[key]);
+                    old_point->shape.setFillColor(sf::Color::White);
+                }
+                this->path_vector.clear();
+            }
+            if (collided==true){
+                break;
+            }
+        }
+        if (collided==true){
+            break;
+        }
+        
+    }
 }
     
 void Game::draw(){
@@ -62,6 +89,18 @@ void Game::draw(){
             PointElement element = key_value.second;
             this->window->draw(element.shape);
         }
+        
+    }
+
+    for( const auto& key_value : this->regions ) {
+
+        std::map<std::string,RegionElement> * region_map = key_value.second;
+
+        for ( const auto& key_value : *region_map){
+            RegionElement element = key_value.second;
+            this->window->draw(element.shape);
+        }
+        
     }
 
     this->window->display();

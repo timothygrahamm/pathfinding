@@ -6,6 +6,7 @@
 #include <ctime>
 #include "game.hpp"
 #include "point_element.hpp"
+#include "region_element.hpp"
 #include "config.hpp"
 
 int WinMain()
@@ -25,6 +26,13 @@ int WinMain()
 
     std::map<std::string, PointElement> * order_map = new std::map<std::string, PointElement>();
     game.pieces["ORDER"] = order_map;
+    
+    
+    std::map<std::string, RegionElement> * obstacle_map = new std::map<std::string, RegionElement>();
+    game.regions["OBSTACLE"] = obstacle_map;
+    sf::Vector2f test_pos(1000,300.f);
+    sf::Vector2f test_dim(200.f,400.f);
+    (*obstacle_map)["0"] = (RegionElement(test_pos,test_dim,sf::Color::White, "0"));
 
     game.run();
 
