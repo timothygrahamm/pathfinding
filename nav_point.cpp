@@ -11,8 +11,20 @@ NavPoint::NavPoint(sf::Vector2f _position, float _size, sf::Color _color, std::s
     this->id = _id;
 }
 
-void NavPoint::calculate_cost(sf::Vector2f destination){
+void NavPoint::calculate_cost(sf::Vector2f destination, std::map<std::string, RegionElement> * obstacle_map){
     int cost = std::abs(int(destination.y) - this->pos.y) + std::abs(int(destination.x) - this->pos.x);
+    bool collided = false;
+    for ( const auto& key_value : *obstacle_map){
+        RegionElement element = key_value.second;
+        if (this->shape.getPosition().x + (NAV_MAP_GAP) > element.shape.getPosition().x && this->shape.getPosition().x - (NAV_MAP_GAP) < element.shape.getPosition().x + element.shape.getSize().x &&
+        this->shape.getPosition().y + (NAV_MAP_GAP) > element.shape.getPosition().y && this->shape.getPosition().y - (NAV_MAP_GAP) < element.shape.getPosition().y + element.shape.getSize().y){
+            collided = true;
+        }
+        if (collided==true){
+            cost = 9999999;
+            break;
+        }
+    }
     this->cost = cost;
 }
 

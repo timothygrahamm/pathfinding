@@ -57,8 +57,8 @@ void Game::check_collisions(){
         std::map<std::string,RegionElement> * region_map = key_value.second;
         for ( const auto& key_value : *region_map){
             RegionElement element = key_value.second;
-            if (subject->shape.getPosition().x + subject->shape.getRadius() > element.shape.getPosition().x && subject->shape.getPosition().x - subject->shape.getRadius() < element.shape.getPosition().x + element.shape.getSize().x &&
-            subject->shape.getPosition().y + subject->shape.getRadius() > element.shape.getPosition().y && subject->shape.getPosition().y - subject->shape.getRadius() < element.shape.getPosition().y + element.shape.getSize().y){
+            if (subject->shape.getPosition().x + (subject->shape.getRadius()) > element.shape.getPosition().x && subject->shape.getPosition().x - (subject->shape.getRadius()) < element.shape.getPosition().x + element.shape.getSize().x &&
+            subject->shape.getPosition().y + (subject->shape.getRadius()) > element.shape.getPosition().y && subject->shape.getPosition().y - (subject->shape.getRadius()) < element.shape.getPosition().y + element.shape.getSize().y){
                 this->path_step = 0;
                 NavPoint * old_point;
                 for( const auto& key : this->path_vector ) {
@@ -116,29 +116,40 @@ void Game::inputs(){
         
         if (event.type == sf::Event::MouseButtonPressed){
             
-            if (this->pieces["ORDER"]->size()==0){
-                sf::Vector2f order_pos(event.mouseButton.x,event.mouseButton.y);
-                (*this->pieces["ORDER"])["0"] = PointElement(order_pos,5.f,sf::Color::Red,"0");
+            if (event.mouseButton.button == sf::Mouse::Left){
+
+                if (this->pieces["ORDER"]->size()==0){
+                    sf::Vector2f order_pos(event.mouseButton.x,event.mouseButton.y);
+                    (*this->pieces["ORDER"])["0"] = PointElement(order_pos,5.f,sf::Color::Red,"0");
+                }
+                else{
+                    std::string nav_map_key_old = find_closest_nav_point_key((*this->pieces["ORDER"])["0"].shape.getPosition().x,(*this->pieces["ORDER"])["0"].shape.getPosition().y);
+
+                    (*this->pieces["NAVMAP"])[nav_map_key_old].shape.setFillColor(sf::Color::White);
+
+                    (*this->pieces["ORDER"])["0"].move_to(event.mouseButton.x,event.mouseButton.y);
+                }
+
+                std::string nav_map_key = find_closest_nav_point_key(event.mouseButton.x,event.mouseButton.y);
+                (*this->pieces["NAVMAP"])[nav_map_key].shape.setFillColor(sf::Color::Yellow);
+            
+                this->path_step = 0;
+
+                for ( std::string key_value : this->nav_map_keys){
+                    NavPoint * element = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[key_value]);
+                    element->calculate_cost((*this->pieces["ORDER"])["0"].shape.getPosition(), this->regions["OBSTACLE"]);
+                }
+
+                this->path_vector = *GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
+
             }
-            else{
-                std::string nav_map_key_old = find_closest_nav_point_key((*this->pieces["ORDER"])["0"].shape.getPosition().x,(*this->pieces["ORDER"])["0"].shape.getPosition().y);
 
-                (*this->pieces["NAVMAP"])[nav_map_key_old].shape.setFillColor(sf::Color::White);
-
-                (*this->pieces["ORDER"])["0"].move_to(event.mouseButton.x,event.mouseButton.y);
+            else if (event.mouseButton.button == sf::Mouse::Right) {
+                std::string new_obstacle_id = std::to_string((*this->regions["OBSTACLE"]).size());
+                sf::Vector2f pos(event.mouseButton.x,event.mouseButton.y);
+                sf::Vector2f dim(100.f,100.f);
+                (*this->regions["OBSTACLE"])[new_obstacle_id] = (RegionElement(pos,dim,sf::Color::White, new_obstacle_id));
             }
-
-            std::string nav_map_key = find_closest_nav_point_key(event.mouseButton.x,event.mouseButton.y);
-            (*this->pieces["NAVMAP"])[nav_map_key].shape.setFillColor(sf::Color::Yellow);
-           
-            this->path_step = 0;
-
-            for ( std::string key_value : this->nav_map_keys){
-                NavPoint * element = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[key_value]);
-                element->calculate_cost((*this->pieces["ORDER"])["0"].shape.getPosition());
-            }
-
-            this->path_vector = *GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
         }
     }
 }
@@ -158,6 +169,8 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
     std::string goal_key = find_closest_nav_point_key(goal.x, goal.y);
 
     NavPoint * current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[origin_key]);
+
+    std::vector<std::string> visited_keys = std::vector<std::string>();
     
     while (!goal_reached){
 
@@ -173,12 +186,21 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
             }
             NavPoint * adjacent_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[dir_key]);
 
-            if (adjacent_point->cost < current_cost){
+            bool visited = false;
+            for ( std::string key_value : visited_keys){
+                if (adjacent_point->id == key_value){
+                    visited = true;
+                }
+            }
+
+
+            if (adjacent_point->cost < current_cost && !visited){
+                
                 best_cost_key = adjacent_point->id;
                 current_cost = adjacent_point->cost;
             }
         }
-
+        visited_keys.push_back(best_cost_key);
         current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[best_cost_key]);
         current_point->shape.setFillColor(sf::Color::Yellow);
         path_vector->push_back(best_cost_key);

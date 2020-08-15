@@ -3,6 +3,7 @@
 
 #include "config.hpp"
 #include "point_element.hpp"
+#include "region_element.hpp"
 
 enum Direction
 {
@@ -28,7 +29,7 @@ class NavPoint : public PointElement
 
         std::string get_adj_key(Direction dir);
 
-        void calculate_cost(sf::Vector2f destination);
+        void calculate_cost(sf::Vector2f destination, std::map<std::string, RegionElement> * obstacle_map);
 
         int cost;
 
