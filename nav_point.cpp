@@ -25,7 +25,7 @@ void NavPoint::calculate_cost(sf::Vector2f destination, std::map<std::string, Re
             break;
         }
     }
-    this->cost = cost;
+    this->cost = cost + 1;
 }
 
 std::string NavPoint::get_adj_key(Direction dir){

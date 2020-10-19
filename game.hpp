@@ -9,6 +9,8 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <queue>
+#include <functional>
 
 class Game
 
@@ -34,6 +36,8 @@ class Game
 
         std::vector<std::string> * GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
 
+        std::vector<std::string> * GeneratePathDijkstraWithAstar(sf::Vector2f origin, sf::Vector2f goal);
+
         std::map<std::string, PointElement> * GenerateNavMap(int width, int height);
 
         std::string find_closest_nav_point_key(float _x, float _y);
@@ -47,6 +51,23 @@ class Game
         std::vector<std::string> nav_map_keys;
 
 };
+
+class VisitedNode {
+
+    public:
+
+        VisitedNode();
+
+        VisitedNode(int _cost, std::string _prev_node, std::string _node_key){
+            this->cost = _cost;
+            this->prev_node = _prev_node;
+            this->node_key = node_key;
+        }
+
+        int cost;
+        std::string prev_node;
+        std::string node_key;
+} ;
 
 #endif
 

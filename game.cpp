@@ -193,7 +193,6 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
                 }
             }
 
-
             if (adjacent_point->cost < current_cost && !visited){
                 
                 best_cost_key = adjacent_point->id;
@@ -212,6 +211,64 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
     }
 
     return path_vector;
+}
+
+std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f origin, sf::Vector2f goal){
+
+    bool goal_reached = false;
+    NavPoint * old_point;
+    for( const auto& key : this->path_vector ) {
+        old_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[key]);
+        old_point->shape.setFillColor(sf::Color::White);
+    }
+    this->path_vector.clear();
+
+    auto compare_node_cost = [](VisitedNode left, VisitedNode right) { return (left.cost ^ 1) > (right.cost ^ 1); };
+    
+    std::priority_queue<VisitedNode, std::vector<VisitedNode>, decltype(compare_node_cost)> fringe(compare_node_cost);
+
+    std::map<std::string, VisitedNode> visited_nodes = std::map<std::string, VisitedNode>();
+
+    std::string origin_key = find_closest_nav_point_key(origin.x, origin.y);
+    std::string goal_key = find_closest_nav_point_key(goal.x, goal.y);
+
+    NavPoint * current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[origin_key]);
+
+    visited_nodes[origin_key] = VisitedNode(0, "START", origin_key);
+    
+    while (false){
+
+        std::string dir_key;
+
+        int current_cost = INT32_MAX;
+
+        for ( int dir = NORTH; dir != LAST; dir++ ){
+
+            dir_key = current_point->get_adj_key(Direction(dir));
+
+            if (dir_key==""){
+                continue;
+            }
+
+            NavPoint * adjacent_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[dir_key]);
+
+            VisitedNode v_node = VisitedNode(adjacent_point->cost + visited_nodes[current_point->id].cost, current_point->id, dir_key);
+
+            visited_nodes[dir_key] = v_node;
+
+            fringe.push(v_node);
+
+            //END OF 19/10, gotten to adding newly found nodes to the fringe and visited_nodes
+            //TODO: Dequeue nodes from the fringe (set current point to the fringe node with least cost)
+            //Check if 'new' node has already been visited, compare the costs
+            //stop the pathfinding when no new nodes added
+            // resolve the final path to the goal node
+
+        }
+        
+    }
+
+    return NULL;
 }
 
 std::string Game::find_closest_nav_point_key(float _x, float _y){
