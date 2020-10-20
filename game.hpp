@@ -5,6 +5,7 @@
 #include "point_element.hpp"
 #include "nav_point.hpp"
 #include "region_element.hpp"
+#include "visited_node.hpp"
 #include "config.hpp"
 #include <iostream>
 #include <map>
@@ -51,23 +52,6 @@ class Game
         std::vector<std::string> nav_map_keys;
 
 };
-
-class VisitedNode {
-
-    public:
-
-        VisitedNode();
-
-        VisitedNode(int _cost, std::string _prev_node, std::string _node_key){
-            this->cost = _cost;
-            this->prev_node = _prev_node;
-            this->node_key = node_key;
-        }
-
-        int cost;
-        std::string prev_node;
-        std::string node_key;
-} ;
 
 #endif
 

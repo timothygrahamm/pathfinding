@@ -8,6 +8,8 @@ Game::Game(sf::RenderWindow * _window, sf::Font _font){
     std::vector<std::string> nav_map_keys = std::vector<std::string>();
 }
 
+
+
 void Game::run(){
     this->game_running = true;
     while(this->game_running){
@@ -140,8 +142,8 @@ void Game::inputs(){
                     element->calculate_cost((*this->pieces["ORDER"])["0"].shape.getPosition(), this->regions["OBSTACLE"]);
                 }
 
-                this->path_vector = *GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
-
+                //this->path_vector = *GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
+                this->path_vector = *GeneratePathDijkstraWithAstar((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
             }
 
             else if (event.mouseButton.button == sf::Mouse::Right) {
@@ -222,21 +224,25 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
         old_point->shape.setFillColor(sf::Color::White);
     }
     this->path_vector.clear();
+    
+    std::vector<std::string> * path_vector = new std::vector<std::string>();
 
     auto compare_node_cost = [](VisitedNode left, VisitedNode right) { return (left.cost ^ 1) > (right.cost ^ 1); };
     
     std::priority_queue<VisitedNode, std::vector<VisitedNode>, decltype(compare_node_cost)> fringe(compare_node_cost);
 
-    std::map<std::string, VisitedNode> visited_nodes = std::map<std::string, VisitedNode>();
+    std::map<std::string, VisitedNode> expanded_nodes = std::map<std::string, VisitedNode>();
 
     std::string origin_key = find_closest_nav_point_key(origin.x, origin.y);
     std::string goal_key = find_closest_nav_point_key(goal.x, goal.y);
 
-    NavPoint * current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[origin_key]);
+    NavPoint * current_navpoint = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[origin_key]);
 
-    visited_nodes[origin_key] = VisitedNode(0, "START", origin_key);
+    VisitedNode current_point = VisitedNode(0, "START", origin_key);
+
+    expanded_nodes[origin_key] = VisitedNode(0, "START", origin_key);
     
-    while (false){
+    while (true){
 
         std::string dir_key;
 
@@ -244,7 +250,7 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
 
         for ( int dir = NORTH; dir != LAST; dir++ ){
 
-            dir_key = current_point->get_adj_key(Direction(dir));
+            dir_key = current_navpoint->get_adj_key(Direction(dir));
 
             if (dir_key==""){
                 continue;
@@ -252,18 +258,54 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
 
             NavPoint * adjacent_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[dir_key]);
 
-            VisitedNode v_node = VisitedNode(adjacent_point->cost + visited_nodes[current_point->id].cost, current_point->id, dir_key);
-
-            visited_nodes[dir_key] = v_node;
+            VisitedNode v_node = VisitedNode(adjacent_point->cost + current_point.cost, current_point.node_key, dir_key);
 
             fringe.push(v_node);
 
-            //END OF 19/10, gotten to adding newly found nodes to the fringe and visited_nodes
-            //TODO: Dequeue nodes from the fringe (set current point to the fringe node with least cost)
-            //Check if 'new' node has already been visited, compare the costs
-            //stop the pathfinding when no new nodes added
-            // resolve the final path to the goal node
+        }
 
+        bool valid_point_not_found = true;
+        while(valid_point_not_found){
+            current_point = fringe.top();
+            if (expanded_nodes.count(current_point.node_key)==0){
+                valid_point_not_found = false;
+            }
+            fringe.pop();
+            if (fringe.size()==0){
+                break;
+            }
+        }
+        
+        current_navpoint = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[current_point.node_key]);
+
+        //current_navpoint->shape.setFillColor(sf::Color::Blue);
+
+        //sleep(10);
+
+        expanded_nodes[current_point.node_key] = VisitedNode(current_point.cost, current_point.prev_node, current_point.node_key);
+
+        std::vector<std::string> path_vector_reversed = std::vector<std::string>();
+
+        if (fringe.size()==0){
+
+
+            VisitedNode resolved_point = expanded_nodes[goal_key];
+            while(true){
+                std::cout << resolved_point.node_key << std::endl;
+                resolved_point = expanded_nodes[resolved_point.prev_node];
+                current_navpoint = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[resolved_point.node_key]);
+                current_navpoint->shape.setFillColor(sf::Color::Yellow);
+
+                path_vector->insert(path_vector->begin(), resolved_point.node_key);
+                if (resolved_point.node_key==origin_key){
+                    break;
+                }
+                if (resolved_point.node_key==resolved_point.prev_node){
+                    std::cout << "FUCK" << std::endl;
+                    break;
+                }
+            }
+            return path_vector;
         }
         
     }
