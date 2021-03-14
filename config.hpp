@@ -7,4 +7,6 @@ const int WINDOW_X = 1600;
 
 const int WINDOW_Y = 900;
 
+const int MOVE_SPEED = 2;
+
 #endif

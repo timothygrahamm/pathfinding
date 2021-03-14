@@ -31,7 +31,7 @@ int WinMain()
     std::map<std::string, RegionElement> * obstacle_map = new std::map<std::string, RegionElement>();
     game.regions["OBSTACLE"] = obstacle_map;
     sf::Vector2f test_pos(1000,300.f);
-    sf::Vector2f test_dim(100.f,100.f);
+    sf::Vector2f test_dim(50.f,50.f);
     (*obstacle_map)["0"] = (RegionElement(test_pos,test_dim,sf::Color::White, "0"));
 
     game.run();

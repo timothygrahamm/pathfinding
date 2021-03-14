@@ -1,4 +1,6 @@
 #include "game.hpp"
+#include "windows.h" 
+
 
 Game::Game(sf::RenderWindow * _window, sf::Font _font){
     this->window = _window;
@@ -15,8 +17,8 @@ void Game::run(){
     while(this->game_running){
         this->inputs();
         this->logic();
-        
         this->draw();
+        Sleep(10);
     }
 }
 
@@ -32,16 +34,16 @@ void Game::logic(){
         NavPoint * next_nav_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[this->path_vector.at(this->path_step)]);
 
         if (destX < next_nav_point->shape.getPosition().x){
-            destX += 0.1;
+            destX += MOVE_SPEED;
         }
         else{
-            destX -= 0.1;
+            destX -= MOVE_SPEED;
         }
         if (destY <  next_nav_point->shape.getPosition().y){
-            destY += 0.1;
+            destY += MOVE_SPEED;
         }
         else{
-            destY -= 0.1;
+            destY -= MOVE_SPEED;
         }
         if (std::abs(destX - next_nav_point->shape.getPosition().x) <= 10 && std::abs(destY - next_nav_point->shape.getPosition().y) <= 10){
             next_nav_point->shape.setFillColor(sf::Color::White);
@@ -68,8 +70,7 @@ void Game::check_collisions(){
                     old_point->shape.setFillColor(sf::Color::White);
                 }
                 this->path_vector.clear();
-            }
-            if (collided==true){
+                collided = true;
                 break;
             }
         }
@@ -133,7 +134,7 @@ void Game::inputs(){
                 }
 
                 std::string nav_map_key = find_closest_nav_point_key(event.mouseButton.x,event.mouseButton.y);
-                (*this->pieces["NAVMAP"])[nav_map_key].shape.setFillColor(sf::Color::Yellow);
+                (*this->pieces["NAVMAP"])[nav_map_key].shape.setFillColor(sf::Color::Green);
             
                 this->path_step = 0;
 
@@ -149,7 +150,7 @@ void Game::inputs(){
             else if (event.mouseButton.button == sf::Mouse::Right) {
                 std::string new_obstacle_id = std::to_string((*this->regions["OBSTACLE"]).size());
                 sf::Vector2f pos(event.mouseButton.x,event.mouseButton.y);
-                sf::Vector2f dim(100.f,100.f);
+                sf::Vector2f dim(50.f,50.f);
                 (*this->regions["OBSTACLE"])[new_obstacle_id] = (RegionElement(pos,dim,sf::Color::White, new_obstacle_id));
             }
         }
@@ -203,7 +204,7 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
         }
         visited_keys.push_back(best_cost_key);
         current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[best_cost_key]);
-        current_point->shape.setFillColor(sf::Color::Yellow);
+        current_point->shape.setFillColor(sf::Color::Green);
         path_vector->push_back(best_cost_key);
 
         if (best_cost_key==goal_key){
@@ -278,32 +279,33 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
         
         current_navpoint = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[current_point.node_key]);
 
-        //current_navpoint->shape.setFillColor(sf::Color::Blue);
+        current_navpoint->shape.setFillColor(sf::Color::Blue);
 
-        //sleep(10);
+        this->draw();
+
+        Sleep(1);
 
         expanded_nodes[current_point.node_key] = VisitedNode(current_point.cost, current_point.prev_node, current_point.node_key);
 
-        std::vector<std::string> path_vector_reversed = std::vector<std::string>();
-
         if (fringe.size()==0){
 
-
+            for ( auto& key_value : *this->pieces["NAVMAP"]){
+                PointElement * element = &key_value.second;
+                element->shape.setFillColor(sf::Color::White);
+            }
+            this->draw();
             VisitedNode resolved_point = expanded_nodes[goal_key];
             while(true){
-                std::cout << resolved_point.node_key << std::endl;
+                //std::cout << resolved_point.node_key << std::endl;
                 resolved_point = expanded_nodes[resolved_point.prev_node];
                 current_navpoint = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[resolved_point.node_key]);
-                current_navpoint->shape.setFillColor(sf::Color::Yellow);
+                current_navpoint->shape.setFillColor(sf::Color::Green);
 
                 path_vector->insert(path_vector->begin(), resolved_point.node_key);
                 if (resolved_point.node_key==origin_key){
                     break;
                 }
-                if (resolved_point.node_key==resolved_point.prev_node){
-                    std::cout << "FUCK" << std::endl;
-                    break;
-                }
+
             }
             return path_vector;
         }
@@ -350,21 +352,21 @@ std::map<std::string, PointElement> * Game::GenerateNavMap(int width, int height
 
     std::map<std::string, PointElement> * node_map = new std::map<std::string, PointElement>();
     for(int x = 0; x <= width; x+=NAV_MAP_GAP){
-         if (x % NAV_MAP_GAP !=0){
-                std::cout << "failed x: " + std::to_string(x) << std::endl;
+        if (x % NAV_MAP_GAP !=0){
+            //std::cout << "failed x: " + std::to_string(x) << std::endl;
         }
         if (x==width){
             x=width-1;
         }
         for(int y = 0; y <= height; y+=NAV_MAP_GAP){
             if (y % NAV_MAP_GAP !=0){
-                std::cout << "failed y: " + std::to_string(y) << std::endl;
+                //std::cout << "failed y: " + std::to_string(y) << std::endl;
             }
             if(y==height){
                 y=y-1;
             }
             std::string id = std::to_string(x) + ',' + std::to_string(y);
-            std::cout << id << std::endl;
+            //std::cout << id << std::endl;
             (*node_map)[id]= (NavPoint(sf::Vector2f(x, y), 2.f, sf::Color::White, id));
             nav_map_keys.push_back(id);
             if (y==height-1){
@@ -376,7 +378,7 @@ std::map<std::string, PointElement> * Game::GenerateNavMap(int width, int height
         }
         
     }
-    std::cout << "END MAP" << std::endl;
+    //std::cout << "END MAP" << std::endl;
     return node_map;
 }
 
