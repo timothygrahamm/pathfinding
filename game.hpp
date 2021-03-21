@@ -35,9 +35,9 @@ class Game
 
         void check_collisions();
 
-        std::vector<std::string> * GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
+        std::vector<std::string> GeneratePath(sf::Vector2f origin, sf::Vector2f goal);
 
-        std::vector<std::string> * GeneratePathDijkstraWithAstar(sf::Vector2f origin, sf::Vector2f goal);
+        std::vector<std::string> GeneratePathDijkstraWithAstar(sf::Vector2f origin, sf::Vector2f goal);
 
         std::map<std::string, PointElement> * GenerateNavMap(int width, int height);
 

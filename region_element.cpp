@@ -6,8 +6,9 @@ RegionElement::RegionElement(sf::Vector2f _position, sf::Vector2f _dimensions, s
     this->color = _color;
     this->shape = sf::RectangleShape(this->dimensions);
     this->shape.setPosition(this->pos);
-    this->shape.setFillColor(this->color);
     this->shape.setOutlineColor(this->color);
+    this->shape.setOutlineThickness(1);
+    this->shape.setFillColor(sf::Color::Transparent);
     this->id = _id;
 }
 

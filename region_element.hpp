@@ -19,11 +19,13 @@ class RegionElement
 
         std::string id;
 
-    protected:
-        
         sf::Vector2f pos;
         sf::Vector2f dimensions;
         sf::Color color;
+
+    protected:
+        
+        
         
 
 };

@@ -9,4 +9,6 @@ const int WINDOW_Y = 900;
 
 const int MOVE_SPEED = 2;
 
+const float PATH_CALCULATION_DELAY = 0.3;
+
 #endif

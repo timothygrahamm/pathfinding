@@ -143,8 +143,8 @@ void Game::inputs(){
                     element->calculate_cost((*this->pieces["ORDER"])["0"].shape.getPosition(), this->regions["OBSTACLE"]);
                 }
 
-                //this->path_vector = *GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
-                this->path_vector = *GeneratePathDijkstraWithAstar((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
+                //this->path_vector = GeneratePath((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
+                this->path_vector = GeneratePathDijkstraWithAstar((*this->pieces["SUBJECT"])["0"].shape.getPosition(), (*this->pieces["ORDER"])["0"].shape.getPosition());
             }
 
             else if (event.mouseButton.button == sf::Mouse::Right) {
@@ -153,11 +153,19 @@ void Game::inputs(){
                 sf::Vector2f dim(50.f,50.f);
                 (*this->regions["OBSTACLE"])[new_obstacle_id] = (RegionElement(pos,dim,sf::Color::White, new_obstacle_id));
             }
+
         }
+
+        /*else if (event.type == sf::Event::MouseButtonReleased){
+            std::cout << "RELEASED" << std::endl;
+            for ( const auto& key_value : *this->regions["OBSTACLE"]){
+                (*this->regions["OBSTACLE"])[key_value.first] = (RegionElement(key_value.second.pos,key_value.second.dim,sf::Color::White, new_obstacle_id));
+        }*/
+        
     }
 }
 
-std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f goal){
+std::vector<std::string> Game::GeneratePath(sf::Vector2f origin, sf::Vector2f goal){
 
     bool goal_reached = false;
     NavPoint * old_point;
@@ -166,7 +174,8 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
         old_point->shape.setFillColor(sf::Color::White);
     }
     this->path_vector.clear();
-    std::vector<std::string> * path_vector = new std::vector<std::string>();
+
+    std::vector<std::string> path_vector = std::vector<std::string>();
 
     std::string origin_key = find_closest_nav_point_key(origin.x, origin.y);
     std::string goal_key = find_closest_nav_point_key(goal.x, goal.y);
@@ -205,7 +214,7 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
         visited_keys.push_back(best_cost_key);
         current_point = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[best_cost_key]);
         current_point->shape.setFillColor(sf::Color::Green);
-        path_vector->push_back(best_cost_key);
+        path_vector.push_back(best_cost_key);
 
         if (best_cost_key==goal_key){
             goal_reached = true;
@@ -216,7 +225,7 @@ std::vector<std::string> * Game::GeneratePath(sf::Vector2f origin, sf::Vector2f 
     return path_vector;
 }
 
-std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f origin, sf::Vector2f goal){
+std::vector<std::string> Game::GeneratePathDijkstraWithAstar(sf::Vector2f origin, sf::Vector2f goal){
 
     bool goal_reached = false;
     NavPoint * old_point;
@@ -226,7 +235,7 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
     }
     this->path_vector.clear();
     
-    std::vector<std::string> * path_vector = new std::vector<std::string>();
+    std::vector<std::string> path_vector = std::vector<std::string>();
 
     auto compare_node_cost = [](VisitedNode left, VisitedNode right) { return (left.cost ^ 1) > (right.cost ^ 1); };
     
@@ -283,7 +292,7 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
 
         this->draw();
 
-        Sleep(1);
+        Sleep(PATH_CALCULATION_DELAY);
 
         expanded_nodes[current_point.node_key] = VisitedNode(current_point.cost, current_point.prev_node, current_point.node_key);
 
@@ -301,7 +310,7 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
                 current_navpoint = static_cast<NavPoint*>(&(*this->pieces["NAVMAP"])[resolved_point.node_key]);
                 current_navpoint->shape.setFillColor(sf::Color::Green);
 
-                path_vector->insert(path_vector->begin(), resolved_point.node_key);
+                path_vector.insert(path_vector.begin(), resolved_point.node_key);
                 if (resolved_point.node_key==origin_key){
                     break;
                 }
@@ -312,7 +321,7 @@ std::vector<std::string> * Game::GeneratePathDijkstraWithAstar(sf::Vector2f orig
         
     }
 
-    return NULL;
+    return std::vector<std::string>();
 }
 
 std::string Game::find_closest_nav_point_key(float _x, float _y){
